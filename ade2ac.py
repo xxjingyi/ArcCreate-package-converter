@@ -5,7 +5,13 @@ import os
 import shutil
 import zipfile
 
-import yaml
+# Here's a statement to determine whether you have Yaml or not
+# They use the ANSI escape sequence for different colors
+try:
+    import yaml
+except ImportError:
+    print("Module \033[1mPyYaml\033[0m is not installed. \nPlease use \033[1;36mpip install pyyaml\033[0m to install it.")
+    sys.exit()
 
 args = sys.argv
 
@@ -40,13 +46,59 @@ else:
 
 def default_text(key):
     if adeproj_exist:
-        return f"(Empty for: {adeproj[key]})"
+        # If a person does not fill in a place, automatically returns nothing (means he/she should fill in one)
+        if adeproj[key] == 'null':
+            return ""
+        else:
+            return f"(Empty for: {adeproj[key]})"
     else:
         return ""
 
+
+# This step fills in the audio name
 audio = input("Audio file name: ")
-preview_start = int(input("Preview start: "))
-preview_end = int(input("Preview end: "))
+
+# This step fills in the preview_start and preview_end and checks if they are legal or not
+# We store the original (previous loop) data via a variable preview_start_backup
+# This is to enable the following procedure (see note below)
+preview_start = input("Preview start(Empty for 0): ")
+preview_start_backup = preview_start
+
+while 1:
+    # Borrowing from preview_start here, when the value is "Pass" (case insensitive)
+    # So if preview_start == pass, 
+    #   we're going to reassign the value to preview_start by using preview_start_backup
+    if preview_start == "pass" or preview_start == "Pass":
+        preview_start = int(preview_start_backup)
+        break
+    elif preview_start == '':
+        preview_start = 0
+        preview_start_backup = 0
+    else:
+        preview_start = int(preview_start)
+        preview_start_backup = preview_start
+
+    preview_end = input("Preview end(Empty for 10000): ")
+    if preview_end == '':
+        preview_end = 10000
+    else:
+        preview_end = int(preview_end)
+    
+    #print(preview_start, preview_end, preview_end <= preview_start)
+
+    # Here two quantities are tested
+    # When they are not legal, the two quantities are re-entered.
+    # We have a mandatory exit: 
+    #   when there is an error in the determination, it will borrow preview_start as the exit: 
+    #       force the exit when the preview_start is entered as "Pass" (case-insensitive)
+    if preview_end <= preview_start:
+        print("\n\nEntered the wrong number and please re-enter: \033[4mpreview_start should be less than preview_end\033[0m")
+        print("If you are confident that you have not made a mistake, please fill in 'Pass' in the preview_start box below.\n")
+        preview_start = input("Preview start(Empty for 0): ")
+    else:
+        break
+#print(preview_start, preview_end); print(preview_end <= preview_start)
+
 jacket = input("Jacket file name: ")
 illustrator = input("Jacket illustrator: ")
 bg_path = Path(input("Background Path: ").strip())
