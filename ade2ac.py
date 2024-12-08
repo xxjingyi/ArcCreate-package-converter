@@ -33,7 +33,7 @@ adeproj_path = proj_path / "Arcade" / "Project.arcade"
 adeproj_exist = adeproj_path.is_file()
 
 if adeproj_exist:
-    with open(f"{proj_path}/Arcade/Project.arcade", "r") as f:
+    with open(f"{proj_path}/Arcade/Project.arcade", "r", encoding='utf-8') as f:
         adeproj = json.load(f)
 else:
     adeproj = {}
